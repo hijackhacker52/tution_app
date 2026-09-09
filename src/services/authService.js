@@ -1,11 +1,13 @@
 import { supabase, isSupabaseConfigured } from './supabase';
 import { initialTuitionData } from '../data/tuitionData';
 
-const SESSION_KEY = 'ndt_academy_active_session';
+const SESSION_KEY = 'learning_hub_active_session';
+const STUDENTS_REGISTRY_KEY = 'learning_hub_students_registry';
+const TEACHERS_REGISTRY_KEY = 'learning_hub_teachers_registry';
 
 /**
  * Enhanced Authentication & Session Management Service
- * Supports Supabase Auth with secure persistent local fallback and Account Recovery workflows.
+ * Supports Supabase Auth with secure dynamic local registry fallback and Account Recovery workflows.
  */
 export const authService = {
   // Session Persistence Helpers
@@ -31,6 +33,50 @@ export const authService = {
       localStorage.removeItem(SESSION_KEY);
     } catch (e) {
       console.error('Failed to clear stored auth session:', e);
+    }
+  },
+
+  // Dynamic Student Registry
+  getRegisteredStudents() {
+    try {
+      const stored = localStorage.getItem(STUDENTS_REGISTRY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed reading students registry from storage:', e);
+    }
+    return initialTuitionData.students || [];
+  },
+
+  saveRegisteredStudents(students) {
+    try {
+      localStorage.setItem(STUDENTS_REGISTRY_KEY, JSON.stringify(students));
+    } catch (e) {
+      console.error('Failed to save students registry:', e);
+    }
+  },
+
+  // Dynamic Teacher Registry
+  getRegisteredTeachers() {
+    try {
+      const stored = localStorage.getItem(TEACHERS_REGISTRY_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed reading teachers registry from storage:', e);
+    }
+    return initialTuitionData.teachers || [];
+  },
+
+  saveRegisteredTeachers(teachers) {
+    try {
+      localStorage.setItem(TEACHERS_REGISTRY_KEY, JSON.stringify(teachers));
+    } catch (e) {
+      console.error('Failed to save teachers registry:', e);
     }
   },
 
@@ -69,12 +115,12 @@ export const authService = {
       }
     }
 
-    // 2. Controlled Secure Fallback Authentication for Local Dev / Testing
-    // Search matching account in local dataset
+    // 2. Controlled Secure Dynamic Fallback Authentication for Local Dev / Testing
     let matchedUser = null;
 
     if (cleanRole === 'student') {
-      matchedUser = initialTuitionData.students.find((s) => {
+      const currentStudents = this.getRegisteredStudents();
+      matchedUser = currentStudents.find((s) => {
         const eMatch = s.email && s.email.toLowerCase() === cleanEmail;
         const iMatch = s.id && s.id.toLowerCase() === cleanEmail;
         const rMatch = s.rollNo && s.rollNo.toLowerCase() === cleanEmail;
@@ -82,19 +128,37 @@ export const authService = {
         return eMatch || iMatch || rMatch || sMatch;
       });
 
-      // Fallback matching for demo testing
-      if (!matchedUser) {
-        matchedUser = initialTuitionData.students.find(s => s.standard === 'Class 6') || initialTuitionData.students[0];
+      // Strict Access Control Check
+      if (matchedUser && matchedUser.isActive === false) {
+        return {
+          user: null,
+          role: cleanRole,
+          error: 'Your student portal access has been suspended by the administration. Please contact the centre office.'
+        };
       }
     } else if (cleanRole === 'teacher') {
-      matchedUser = initialTuitionData.teachers.find(
-        (t) => (t.email && t.email.toLowerCase() === cleanEmail) || (t.id && t.id.toLowerCase() === cleanEmail)
+      const currentTeachers = this.getRegisteredTeachers();
+      matchedUser = currentTeachers.find(
+        (t) => (t.email && t.email.toLowerCase() === cleanEmail) || 
+               (t.id && t.id.toLowerCase() === cleanEmail)
       );
-      if (!matchedUser) {
-        matchedUser = initialTuitionData.teachers[0];
+
+      // Strict Access Control Check
+      if (matchedUser && (matchedUser.isActive === false || matchedUser.status === 'Access Suspended')) {
+        return {
+          user: null,
+          role: cleanRole,
+          error: 'Your faculty portal access has been suspended by the administration. Please contact the management.'
+        };
       }
     } else if (cleanRole === 'admin') {
-      if (cleanEmail === 'naveenpanneerselvam78@gmail.com' || cleanEmail === 'admin@ndt.com' || cleanEmail.includes('admin')) {
+      if (
+        cleanEmail === 'naveenpanneerselvam78@gmail.com' || 
+        cleanEmail === 'admin@learninghub.com' ||
+        cleanEmail === 'admin@ndt.com' || 
+        cleanEmail === 'admin' ||
+        cleanEmail.includes('admin')
+      ) {
         matchedUser = {
           id: 'adm-01',
           name: 'Naveen Panneerselvam',
@@ -109,21 +173,24 @@ export const authService = {
       return { 
         user: null, 
         role: cleanRole, 
-        error: `No registered ${cleanRole} account found matching "${cleanEmail}". Please check your email or contact administration.` 
+        error: `No registered ${cleanRole} account found matching "${cleanEmail}". Please check your ID or contact administration.` 
       };
     }
 
-    // Validate Password (supports Student1#2026, 123456, Admin#2026!, or any entered password in demo mode)
+    // Prepare session user
     const sessionUser = {
       id: matchedUser.id,
-      studentId: matchedUser.studentId || matchedUser.rollNo || 'STU0001',
+      studentId: matchedUser.studentId || matchedUser.rollNo || (cleanRole === 'student' ? 'STU0001' : undefined),
       name: matchedUser.name,
       role: matchedUser.role || cleanRole,
       email: matchedUser.email || cleanEmail,
       avatar: matchedUser.avatar || matchedUser.photo_url,
-      standard: matchedUser.standard || 'Class 6',
+      standard: matchedUser.standard || (cleanRole === 'student' ? 'Class 6' : undefined),
+      assignedClasses: matchedUser.assignedClasses,
       specialization: matchedUser.specialization,
-      dob: matchedUser.dob
+      gender: matchedUser.gender,
+      dob: matchedUser.dob,
+      feePaid: matchedUser.feePaid
     };
 
     this.setStoredSession(sessionUser, cleanRole);
@@ -150,10 +217,12 @@ export const authService = {
     // Fallback registration
     const newUser = {
       id: `usr-${Date.now()}`,
+      studentId: `STU${Date.now().toString().slice(-4)}`,
       name: metadata.full_name || email.split('@')[0],
       email,
       role: cleanRole,
-      standard: metadata.standard || 'Class 10 (SSLC)'
+      standard: metadata.standard || 'Class 10 (SSLC)',
+      isActive: true
     };
     this.setStoredSession(newUser, cleanRole);
     return { user: newUser, error: null };
@@ -174,14 +243,18 @@ export const authService = {
     // Fallback Account Recovery Procedure
     return {
       success: true,
-      message: `Account recovery instructions dispatched for ${cleanEmail}. Default temporary passkey: "NDTReset2026!"`
+      message: `Account recovery instructions dispatched for ${cleanEmail}. Default temporary passkey: "HubReset2026!"`
     };
   },
 
   // Logout
   async logout() {
     if (isSupabaseConfigured()) {
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('Supabase signOut error:', e);
+      }
     }
     this.clearStoredSession();
     return { success: true };

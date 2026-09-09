@@ -21,7 +21,7 @@ export default function AboutPage({ setActiveTab }) {
       <section className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-400/20">
-            About NDT Tuition Academy
+            About {centerInfo.name}
           </span>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Nurturing Minds, Building Futures</h1>
           <p className="text-indigo-200 max-w-2xl mx-auto text-base">

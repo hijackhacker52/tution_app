@@ -1,10 +1,11 @@
-// NDT Tuition Academy - Master Dataset & Public Portal Data
+// கற்றல் மையம் (Learning Hub) - Master Dataset & Public Portal Data
 
 export const initialTuitionData = {
   centerInfo: {
-    name: "NDT Tuition Academy",
+    name: "கற்றல் மையம் (Learning Hub)",
     tagline: "Distraction-Free 1-on-1 Learning & Academy Management",
     curriculum: "TNSCHOOL.com (Class 6 to 12 State Board & Samacheer Kalvi)",
+    adminEmail: "naveenpanneerselvam78@gmail.com",
     establishedYear: 2026,
     activeAcademicYear: "2026-2027",
     academicYearExpiryDate: "2027-03-31"
@@ -28,14 +29,14 @@ export const initialTuitionData = {
     { code: "SCHOLAR100", discountPercent: 100, description: "100% Full Merit Scholarship" }
   ],
 
-  // TNSCHOOL State Board Subjects
+  // TNSCHOOL State Board Subjects (Ready for Admin faculty assignments)
   subjects: [
     {
       code: "TN6-MAT",
       standard: "Class 6",
       name: "Mathematics (கணிதம்)",
       description: "Basic Numbers, Arithmetic, Mensuration & Geometry Foundation.",
-      assignedTeacherId: "tch-1",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -43,7 +44,7 @@ export const initialTuitionData = {
       standard: "Class 6",
       name: "Science (அறிவியல்)",
       description: "Living World, Matter, Energy & Environmental Science.",
-      assignedTeacherId: "tch-2",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -52,7 +53,7 @@ export const initialTuitionData = {
       name: "Mathematics (கணிதம்)",
       nameTamil: "கணிதம்",
       description: "Algebra, Geometry, Trigonometry, Mensuration & Matrices (TNSCHOOL Board Pattern).",
-      assignedTeacherId: "tch-1",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -61,7 +62,7 @@ export const initialTuitionData = {
       name: "Science (அறிவியல்)",
       nameTamil: "அறிவியல்",
       description: "Physics, Chemistry, Botany & Zoology Laws and Practical Experiments.",
-      assignedTeacherId: "tch-2",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -70,7 +71,7 @@ export const initialTuitionData = {
       name: "Social Science (சமூக அறிவியல்)",
       nameTamil: "சமூக அறிவியல்",
       description: "History of Tamil Nadu & India, Geography, Civics & Economics.",
-      assignedTeacherId: "tch-3",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -79,7 +80,7 @@ export const initialTuitionData = {
       name: "Tamil (தமிழ்)",
       nameTamil: "தமிழ்",
       description: "இலக்கணம், செய்யுள், உரைநடை மற்றும் இலக்கிய வரலாறு.",
-      assignedTeacherId: "tch-4",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -88,7 +89,7 @@ export const initialTuitionData = {
       name: "English",
       nameTamil: "ஆங்கிலம்",
       description: "Prose, Poetry, Supplementary, Grammar & Creative Writing skills.",
-      assignedTeacherId: "tch-5",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -97,7 +98,7 @@ export const initialTuitionData = {
       name: "Physics (இயற்பியல்)",
       nameTamil: "இயற்பியல்",
       description: "Electrostatics, Magnetism, Optics & Modern Quantum Physics.",
-      assignedTeacherId: "tch-2",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -106,7 +107,7 @@ export const initialTuitionData = {
       name: "Chemistry (வேதியியல்)",
       nameTamil: "வேதியியல்",
       description: "Organic Chemistry, Metallurgy, Coordination Compounds & Electrochemistry.",
-      assignedTeacherId: "tch-2",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
     },
     {
@@ -115,132 +116,16 @@ export const initialTuitionData = {
       name: "Computer Science (கணினி அறிவியல்)",
       nameTamil: "கணினி அறிவியல்",
       description: "Python Programming, Data Structures, SQL Database & OOPs Concepts.",
-      assignedTeacherId: "tch-1",
+      assignedTeacherId: "",
       imagePresentation: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80"
     }
   ],
 
-  // Faculty Database
-  teachers: [
-    {
-      id: "tch-1",
-      name: "Prof. K. Arumugam",
-      role: "Senior Mathematics & CS Faculty",
-      specialization: "Mathematics & Computer Science",
-      avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&q=80",
-      hourlyRate: 45,
-      hoursThisMonth: 124,
-      clockedIn: true,
-      clockedInTime: "08:30 AM",
-      status: "Active Online",
-      rating: 4.9,
-      doubtsSolved: 142
-    },
-    {
-      id: "tch-2",
-      name: "Dr. V. Malathi",
-      role: "Science Lead Specialist",
-      specialization: "Physics & Chemistry",
-      avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80",
-      hourlyRate: 50,
-      hoursThisMonth: 110,
-      clockedIn: false,
-      status: "Clocked Out",
-      rating: 4.95,
-      doubtsSolved: 188
-    },
-    {
-      id: "tch-3",
-      name: "Prof. S. Ranganathan",
-      role: "Social Science & History Lead",
-      specialization: "Social Science",
-      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
-      hourlyRate: 40,
-      hoursThisMonth: 96,
-      clockedIn: false,
-      status: "Clocked Out",
-      rating: 4.8,
-      doubtsSolved: 94
-    },
-    {
-      id: "tch-4",
-      name: "Dr. M. Senthamizhan",
-      role: "Tamil Literature Specialist",
-      specialization: "Tamil Language",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
-      hourlyRate: 42,
-      hoursThisMonth: 104,
-      clockedIn: true,
-      status: "Active Online",
-      rating: 4.92,
-      doubtsSolved: 130
-    },
-    {
-      id: "tch-5",
-      name: "Prof. Alex Mercer",
-      role: "English & Communication Coach",
-      specialization: "English",
-      avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
-      hourlyRate: 45,
-      hoursThisMonth: 118,
-      clockedIn: false,
-      status: "Available Substitute",
-      rating: 4.88,
-      doubtsSolved: 112
-    }
-  ],
+  // Faculty Database (Reset to clean state - ready for Admin appointment)
+  teachers: [],
 
-  // Student Database
-  students: [
-    {
-      id: "std-101",
-      studentId: "STU0001",
-      email: "student1@ndt.com",
-      name: "Naveen S",
-      gender: "Male",
-      dob: "2010-08-14",
-      role: "Student",
-      standard: "Class 10 (SSLC)",
-      rollNo: "TN-2026-101",
-      avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
-      attendanceRate: 96,
-      feePaid: false,
-      feeAmount: 250,
-      academicYearValidUntil: "2027-03-31"
-    },
-    {
-      id: "std-102",
-      studentId: "STU0002",
-      email: "student2@ndt.com",
-      name: "Kavitha R",
-      gender: "Female",
-      dob: "2009-04-12",
-      role: "Student",
-      standard: "Class 12 (HSC)",
-      rollNo: "TN-2026-102",
-      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
-      attendanceRate: 98,
-      feePaid: true,
-      feeAmount: 350,
-      academicYearValidUntil: "2027-03-31"
-    },
-    {
-      id: "std-103",
-      studentId: "STU0003",
-      email: "student3@ndt.com",
-      name: "Arun Kumar",
-      gender: "Male",
-      dob: "2014-05-10",
-      role: "Student",
-      standard: "Class 6",
-      rollNo: "TN-2026-103",
-      avatar: "https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=400&q=80",
-      attendanceRate: 100,
-      feePaid: false,
-      feeAmount: 150,
-      academicYearValidUntil: "2027-03-31"
-    }
-  ],
+  // Student Database (Reset to clean state - ready for Admin enrolment)
+  students: [],
 
   // Public Announcements & Notices
   notices: [
@@ -290,16 +175,7 @@ export const initialTuitionData = {
       subject: "Mathematics (கணிதம்)",
       durationMinutes: 45,
       totalQuestions: 10,
-      studentAttempts: {
-        "std-101": {
-          status: "Not Started",
-          attemptsUsed: 0,
-          maxAllowedAttempts: 1,
-          completedAt: null,
-          score: 0,
-          maxScore: 100
-        }
-      },
+      studentAttempts: {},
       questions: [
         {
           id: 1,
@@ -311,50 +187,6 @@ export const initialTuitionData = {
     }
   ],
 
-  // Video Notes (YouTube Link System)
-  videoNotes: [
-    {
-      id: "vnot-1",
-      title: "Class 6 Science: Living World of Plants & Animals",
-      description: "Learn fundamental biological concepts of plant cell structures, photosynthesis, and habitat classification.",
-      youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      youtubeVideoId: "dQw4w9WgXcQ",
-      thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-      standard: "Class 6",
-      subject: "Science (அறிவியல்)",
-      chapter: "Living World",
-      status: "Active",
-      uploadedBy: "Dr. V. Malathi",
-      createdAt: "2026-08-30"
-    },
-    {
-      id: "vnot-2",
-      title: "Class 6 Mathematics: Percentage & Ratio Basics",
-      description: "Step-by-step introduction to computing percentages, converting ratios to fractions, and solving real-world word problems.",
-      youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      youtubeVideoId: "dQw4w9WgXcQ",
-      thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-      standard: "Class 6",
-      subject: "Mathematics (கணிதம்)",
-      chapter: "Percentage Basics",
-      status: "Active",
-      uploadedBy: "Prof. K. Arumugam",
-      createdAt: "2026-08-31"
-    },
-    {
-      id: "vnot-3",
-      title: "Class 10 SSLC Mathematics: Matrices & Determinants Explained",
-      description: "Detailed step-by-step solution for 5-mark state board exam questions on matrix multiplication and determinant properties.",
-      youtubeUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-      youtubeVideoId: "dQw4w9WgXcQ",
-      thumbnailUrl: "https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg",
-      standard: "Class 10 (SSLC)",
-      subject: "Mathematics (கணிதம்)",
-      chapter: "Matrices",
-      status: "Active",
-      uploadedBy: "Prof. K. Arumugam",
-      createdAt: "2026-08-25"
-    }
-  ]
+  // Video Notes (YouTube Link System - Ready for Admin & Teachers to publish real lectures)
+  videoNotes: []
 };
-

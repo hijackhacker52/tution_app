@@ -55,7 +55,7 @@ export default function BirthdayModal({ activeUser, isOpen, onClose }) {
             Happy Birthday, <span className="gradient-text">{activeUser.name}</span>! 🎉
           </h3>
           <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-            NDT Academy & Admin Naveen Panneerselvam wish you an outstanding, successful academic year filled with excellence!
+            கற்றல் மையம் (Learning Hub) & Admin Naveen Panneerselvam wish you an outstanding, successful academic year filled with excellence!
           </p>
         </div>
 
@@ -65,7 +65,7 @@ export default function BirthdayModal({ activeUser, isOpen, onClose }) {
               <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
               <span>Birthday Wishes & Star Gift Badge Dispatched!</span>
             </p>
-            <p className="text-[11px] text-slate-300 font-normal">Thank you for celebrating with NDT Academy!</p>
+            <p className="text-[11px] text-slate-300 font-normal">Thank you for celebrating with கற்றல் மையம் (Learning Hub)!</p>
           </div>
         ) : (
           <button

@@ -21,7 +21,7 @@ export default function GalleryPage() {
           <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-400/20">
             Academy Gallery
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Life & Achievements at NDT</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Life & Achievements at {centerInfo.name}</h1>
           <p className="text-indigo-200 max-w-2xl mx-auto text-base">
             Moments of academic celebration, practical lab work, and personalized learning.
           </p>

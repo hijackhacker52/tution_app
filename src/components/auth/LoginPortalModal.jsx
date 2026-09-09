@@ -19,12 +19,12 @@ export default function LoginPortalModal({ isOpen, onClose, onLoginSuccess, onRe
     setErrorMessage('');
 
     if (activeTab === 'student') {
-      const email = userId || 'student1@ndt.com';
-      onLoginSuccess('student', { id: 'std-101', name: 'Naveen S (Student)', role: 'Student', email });
+      const email = userId || 'student@learninghub.com';
+      onLoginSuccess('student', { id: 'std-101', name: 'Student Portal User', role: 'Student', email });
       onClose();
     } else if (activeTab === 'teacher') {
-      const email = userId || 'teacher1@ndt.com';
-      onLoginSuccess('teacher', { id: 'tch-1', name: 'Prof. K. Arumugam (Faculty)', role: 'Teacher', email });
+      const email = userId || 'teacher@learninghub.com';
+      onLoginSuccess('teacher', { id: 'tch-1', name: 'Faculty Member', role: 'Teacher', email });
       onClose();
     } else {
       const email = userId || 'naveenpanneerselvam78@gmail.com';
@@ -35,7 +35,7 @@ export default function LoginPortalModal({ isOpen, onClose, onLoginSuccess, onRe
 
   const handleSendResetRequest = (e) => {
     e.preventDefault();
-    const idToUse = userId || (activeTab === 'student' ? 'student1@ndt.com' : 'teacher1@ndt.com');
+    const idToUse = userId || (activeTab === 'student' ? 'student@learninghub.com' : 'teacher@learninghub.com');
     onRequestPasswordReset({
       userId: idToUse,
       userType: activeTab === 'student' ? 'Student' : 'Teacher',
@@ -54,7 +54,7 @@ export default function LoginPortalModal({ isOpen, onClose, onLoginSuccess, onRe
         <div className="bg-slate-950 px-6 py-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Lock className="w-5 h-5 text-indigo-400" />
-            <h3 className="font-bold text-slate-100 text-base">NDT Academy Portal Sign In</h3>
+            <h3 className="font-bold text-slate-100 text-base">கற்றல் மையம் (Learning Hub) Portal Sign In</h3>
           </div>
           <button
             onClick={onClose}
@@ -137,15 +137,15 @@ export default function LoginPortalModal({ isOpen, onClose, onLoginSuccess, onRe
                   onChange={(e) => setUserId(e.target.value)}
                   placeholder={
                     activeTab === 'student'
-                      ? 'student1@ndt.com'
+                      ? 'student@learninghub.com'
                       : activeTab === 'teacher'
-                      ? 'teacher1@ndt.com'
+                      ? 'teacher@learninghub.com'
                       : 'naveenpanneerselvam78@gmail.com'
                   }
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 />
                 <p className="text-[11px] text-indigo-400 mt-1 font-mono">
-                  Default ID: {activeTab === 'student' ? 'student1@ndt.com' : activeTab === 'teacher' ? 'teacher1@ndt.com' : 'naveenpanneerselvam78@gmail.com'}
+                  Default ID: {activeTab === 'student' ? 'student@learninghub.com' : activeTab === 'teacher' ? 'teacher@learninghub.com' : 'naveenpanneerselvam78@gmail.com'}
                 </p>
               </div>
 
@@ -213,7 +213,7 @@ export default function LoginPortalModal({ isOpen, onClose, onLoginSuccess, onRe
                   type="text"
                   value={userId}
                   onChange={(e) => setUserId(e.target.value)}
-                  placeholder={activeTab === 'student' ? 'student1@ndt.com' : 'teacher1@ndt.com'}
+                  placeholder={activeTab === 'student' ? 'student@learninghub.com' : 'teacher@learninghub.com'}
                   className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-sm focus:border-indigo-500 focus:outline-none"
                 />
               </div>

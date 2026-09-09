@@ -1,24 +1,35 @@
 import React, { useState } from 'react';
 import { 
-  LayoutDashboard, Users, GraduationCap, BookOpen, Layers, FolderKanban, 
-  FileText, ClipboardList, CalendarCheck, Award, Bell, Image as ImageIcon, 
-  BarChart3, Bot, Settings, ChevronRight, Search, Filter, CheckCircle2, X,
-  Menu, Upload, UserPlus, CreditCard, Tag, Plus, Trash2, ShieldCheck, DollarSign,
-  Film, Play, ExternalLink, Edit3, Power
+  LayoutDashboard, Users, GraduationCap, BookOpen, Layers, 
+  FileText, Bell, Settings, ChevronRight, Menu, Plus, Trash2,
+  Tag, CreditCard, Power, ExternalLink, Film, CheckCircle2, X
 } from 'lucide-react';
-import { extractYouTubeVideoId, getYouTubeThumbnailUrl, isValidYouTubeUrl } from '../../utils/youtubeUtils';
+import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../utils/youtubeUtils';
+import StudentManagement from './StudentManagement';
+import TeacherManagement from './TeacherManagement';
+import SubjectManagement from './SubjectManagement';
 
 export default function AdminDashboard({ 
   centerInfo, 
   teachers = [], 
   students = [], 
+  subjects = [],
   notices = [],
   materials = [],
   videoNotes = [],
   standardsList = [],
   coupons = [],
   onUploadVideoNote,
-  onDeleteVideoNote
+  onDeleteVideoNote,
+  onAddStudent,
+  onUpdateStudent,
+  onDeleteStudent,
+  onAddTeacher,
+  onUpdateTeacher,
+  onDeleteTeacher,
+  onAddSubject,
+  onUpdateSubject,
+  onDeleteSubject
 }) {
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -66,7 +77,7 @@ export default function AdminDashboard({
   const [videoFormError, setVideoFormError] = useState('');
 
   // Fee & Coupon States
-  const [classList, setClassList] = useState(standardsList.length > 0 ? standardsList : [
+  const [classList] = useState(standardsList.length > 0 ? standardsList : [
     { id: "std-6", name: "Class 6", description: "6th Standard TNSCHOOL Samacheer Kalvi", feeAmount: 150 },
     { id: "std-7", name: "Class 7", description: "7th Standard TNSCHOOL Samacheer Kalvi", feeAmount: 165 },
     { id: "std-8", name: "Class 8", description: "8th Standard TNSCHOOL Upper Primary", feeAmount: 180 },
@@ -76,27 +87,21 @@ export default function AdminDashboard({
     { id: "std-12", name: "Class 12 (HSC)", description: "12th Standard HSC State Board Public", feeAmount: 350 }
   ]);
 
-  const [couponList, setCouponList] = useState(coupons.length > 0 ? coupons : [
+  const [couponList] = useState(coupons.length > 0 ? coupons : [
     { code: "EARLYBIRD50", discountPercent: 50, description: "50% Early Admission Discount" },
     { code: "APEX20", discountPercent: 20, description: "20% Academic Excellence Discount" }
   ]);
 
-  // Search & Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filterClass, setFilterClass] = useState('all');
-
-  // Modals & Notifications
-  const [isAddStudentModalOpen, setIsAddStudentModalOpen] = useState(false);
   const [actionSuccessMessage, setActionSuccessMessage] = useState('');
 
   const sidebarItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'students', label: 'Student Management', icon: GraduationCap },
+    { id: 'teachers', label: 'Teacher Management', icon: Users },
+    { id: 'subjects', label: 'Subject Management', icon: Layers },
     { id: 'video-notes', label: 'Video Notes', icon: Film },
-    { id: 'students', label: 'Students', icon: GraduationCap },
-    { id: 'teachers', label: 'Teachers', icon: Users },
     { id: 'fees-coupons', label: 'Fees & Coupons', icon: CreditCard },
-    { id: 'classes', label: 'Classes', icon: BookOpen },
-    { id: 'subjects', label: 'Subjects', icon: Layers },
+    { id: 'classes', label: 'Classes & Matrix', icon: BookOpen },
     { id: 'materials', label: 'Study Materials', icon: FileText },
     { id: 'notices', label: 'Notices', icon: Bell },
     { id: 'settings', label: 'Settings', icon: Settings }
@@ -164,7 +169,10 @@ export default function AdminDashboard({
       
       {/* Mobile Menu Bar */}
       <div className="lg:hidden bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between">
-        <span className="font-bold text-white text-sm">Admin Control Panel</span>
+        <div className="flex items-center space-x-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-bold text-white text-sm">Admin Control Panel</span>
+        </div>
         <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="p-2 rounded-xl bg-slate-800 text-slate-200">
           <Menu className="w-5 h-5" />
         </button>
@@ -175,7 +183,7 @@ export default function AdminDashboard({
         mobileMenuOpen ? 'block' : 'hidden lg:block'
       }`}>
         <div className="px-3 py-2 border-b border-slate-800">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Academy Control</span>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Academy Command</span>
           <h2 className="text-base font-extrabold text-white">Admin Portal</h2>
         </div>
 
@@ -189,7 +197,6 @@ export default function AdminDashboard({
                 onClick={() => {
                   setActiveMenu(item.id);
                   setMobileMenuOpen(false);
-                  setSearchQuery('');
                 }}
                 className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl font-semibold text-xs transition-all ${
                   isActive
@@ -213,7 +220,7 @@ export default function AdminDashboard({
         
         {/* Global Toast */}
         {actionSuccessMessage && (
-          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between shadow-lg">
             <div className="flex items-center space-x-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-400" />
               <span>{actionSuccessMessage}</span>
@@ -226,7 +233,10 @@ export default function AdminDashboard({
         {activeMenu === 'dashboard' && (
           <div className="space-y-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+              <div 
+                onClick={() => setActiveMenu('students')}
+                className="bg-slate-900 border border-slate-800 hover:border-indigo-500/50 p-5 rounded-2xl space-y-2 cursor-pointer transition-all hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-xs font-semibold">Total Students</span>
                   <GraduationCap className="w-5 h-5 text-indigo-400" />
@@ -235,16 +245,10 @@ export default function AdminDashboard({
                 <p className="text-[10px] text-emerald-400 font-medium">Class 6 to 12 Active</p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
-                <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold">Video Notes</span>
-                  <Film className="w-5 h-5 text-rose-400" />
-                </div>
-                <h3 className="text-2xl font-extrabold text-white">{videoList.length}</h3>
-                <p className="text-[10px] text-indigo-300 font-medium">YouTube Lectures Active</p>
-              </div>
-
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+              <div 
+                onClick={() => setActiveMenu('teachers')}
+                className="bg-slate-900 border border-slate-800 hover:border-purple-500/50 p-5 rounded-2xl space-y-2 cursor-pointer transition-all hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between text-slate-400">
                   <span className="text-xs font-semibold">Faculty Staff</span>
                   <Users className="w-5 h-5 text-purple-400" />
@@ -253,33 +257,172 @@ export default function AdminDashboard({
                 <p className="text-[10px] text-indigo-300 font-medium">Subject Specialists</p>
               </div>
 
-              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-2">
+              <div 
+                onClick={() => setActiveMenu('subjects')}
+                className="bg-slate-900 border border-slate-800 hover:border-blue-500/50 p-5 rounded-2xl space-y-2 cursor-pointer transition-all hover:shadow-lg"
+              >
                 <div className="flex items-center justify-between text-slate-400">
-                  <span className="text-xs font-semibold">Active Coupons</span>
-                  <Tag className="w-5 h-5 text-emerald-400" />
+                  <span className="text-xs font-semibold">Subjects</span>
+                  <Layers className="w-5 h-5 text-blue-400" />
                 </div>
-                <h3 className="text-2xl font-extrabold text-white">{couponList.length} Active</h3>
-                <p className="text-[10px] text-emerald-400 font-medium">Discount Promo Codes</p>
+                <h3 className="text-2xl font-extrabold text-white">{subjects.length}</h3>
+                <p className="text-[10px] text-blue-300 font-medium">Curriculum Courses</p>
+              </div>
+
+              <div 
+                onClick={() => setActiveMenu('video-notes')}
+                className="bg-slate-900 border border-slate-800 hover:border-rose-500/50 p-5 rounded-2xl space-y-2 cursor-pointer transition-all hover:shadow-lg"
+              >
+                <div className="flex items-center justify-between text-slate-400">
+                  <span className="text-xs font-semibold">Video Notes</span>
+                  <Film className="w-5 h-5 text-rose-400" />
+                </div>
+                <h3 className="text-2xl font-extrabold text-white">{videoList.length}</h3>
+                <p className="text-[10px] text-rose-300 font-medium">YouTube Lectures Active</p>
               </div>
             </div>
 
+            {/* Quick Actions Grid */}
             <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-4 shadow-xl">
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Quick Actions</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                <button onClick={() => setActiveMenu('video-notes')} className="p-3.5 rounded-2xl bg-rose-600/20 hover:bg-rose-600/30 border border-rose-500/40 text-rose-300 text-xs font-bold flex flex-col items-center justify-center space-y-2">
-                  <Film className="w-5 h-5 text-rose-400" />
-                  <span>Upload Video Notes</span>
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Management Hub</h3>
+                <span className="text-xs text-slate-400">Direct Actions</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button 
+                  onClick={() => setActiveMenu('students')} 
+                  className="p-4 rounded-2xl bg-indigo-600/15 hover:bg-indigo-600/25 border border-indigo-500/30 text-indigo-300 text-xs font-bold flex flex-col items-center justify-center space-y-2 transition-all hover:scale-[1.02]"
+                >
+                  <GraduationCap className="w-6 h-6 text-indigo-400" />
+                  <span>Student Management</span>
                 </button>
-                <button onClick={() => setActiveMenu('fees-coupons')} className="p-3.5 rounded-2xl bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-bold flex flex-col items-center justify-center space-y-2">
-                  <CreditCard className="w-5 h-5 text-emerald-400" />
-                  <span>Fees & Coupons</span>
+
+                <button 
+                  onClick={() => setActiveMenu('teachers')} 
+                  className="p-4 rounded-2xl bg-purple-600/15 hover:bg-purple-600/25 border border-purple-500/30 text-purple-300 text-xs font-bold flex flex-col items-center justify-center space-y-2 transition-all hover:scale-[1.02]"
+                >
+                  <Users className="w-6 h-6 text-purple-400" />
+                  <span>Teacher Management</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveMenu('subjects')} 
+                  className="p-4 rounded-2xl bg-blue-600/15 hover:bg-blue-600/25 border border-blue-500/30 text-blue-300 text-xs font-bold flex flex-col items-center justify-center space-y-2 transition-all hover:scale-[1.02]"
+                >
+                  <Layers className="w-6 h-6 text-blue-400" />
+                  <span>Subject Management</span>
+                </button>
+
+                <button 
+                  onClick={() => setActiveMenu('video-notes')} 
+                  className="p-4 rounded-2xl bg-rose-600/15 hover:bg-rose-600/25 border border-rose-500/30 text-rose-300 text-xs font-bold flex flex-col items-center justify-center space-y-2 transition-all hover:scale-[1.02]"
+                >
+                  <Film className="w-6 h-6 text-rose-400" />
+                  <span>Video Notes (YouTube)</span>
                 </button>
               </div>
             </div>
+
+            {/* Quick Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Recent Students */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-white text-xs uppercase tracking-wider">Active Class Enrolments</h4>
+                  <button onClick={() => setActiveMenu('students')} className="text-indigo-400 hover:text-indigo-300 text-xs font-semibold">
+                    View All →
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {students.slice(0, 4).map((std) => (
+                    <div key={std.id} className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center font-bold text-[10px]">
+                          {std.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-xs">{std.name}</p>
+                          <p className="text-[10px] text-slate-400 font-mono">{std.studentId || std.rollNo}</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+                        {std.standard}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Faculty Summary */}
+              <div className="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-white text-xs uppercase tracking-wider">Faculty Coverage</h4>
+                  <button onClick={() => setActiveMenu('teachers')} className="text-purple-400 hover:text-purple-300 text-xs font-semibold">
+                    View All →
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {teachers.slice(0, 4).map((tch) => (
+                    <div key={tch.id} className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between text-xs">
+                      <div className="flex items-center space-x-2.5">
+                        <div className="w-7 h-7 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px]">
+                          {tch.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-bold text-white text-xs">{tch.name}</p>
+                          <p className="text-[10px] text-slate-400">{tch.specialization}</p>
+                        </div>
+                      </div>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        tch.clockedIn ? 'bg-emerald-500/20 text-emerald-300' : 'bg-slate-800 text-slate-400'
+                      }`}>
+                        {tch.status || (tch.clockedIn ? 'Online' : 'Clocked Out')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
           </div>
         )}
 
-        {/* 2. VIDEO NOTES MANAGEMENT PANEL */}
+        {/* 2. STUDENT MANAGEMENT MODULE */}
+        {activeMenu === 'students' && (
+          <StudentManagement
+            students={students}
+            standardsList={standardsList}
+            onAddStudent={onAddStudent}
+            onUpdateStudent={onUpdateStudent}
+            onDeleteStudent={onDeleteStudent}
+          />
+        )}
+
+        {/* 3. TEACHER MANAGEMENT MODULE */}
+        {activeMenu === 'teachers' && (
+          <TeacherManagement
+            teachers={teachers}
+            standardsList={standardsList}
+            subjects={subjects}
+            onAddTeacher={onAddTeacher}
+            onUpdateTeacher={onUpdateTeacher}
+            onDeleteTeacher={onDeleteTeacher}
+          />
+        )}
+
+        {/* 4. SUBJECT MANAGEMENT MODULE */}
+        {activeMenu === 'subjects' && (
+          <SubjectManagement
+            subjects={subjects}
+            standardsList={standardsList}
+            teachers={teachers}
+            onAddSubject={onAddSubject}
+            onUpdateSubject={onUpdateSubject}
+            onDeleteSubject={onDeleteSubject}
+          />
+        )}
+
+        {/* 5. VIDEO NOTES MANAGEMENT PANEL */}
         {activeMenu === 'video-notes' && (
           <div className="space-y-8">
             <div className="flex justify-between items-center">
@@ -331,13 +474,9 @@ export default function AdminDashboard({
                       onChange={(e) => setVideoClass(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
                     >
-                      <option>Class 6</option>
-                      <option>Class 7</option>
-                      <option>Class 8</option>
-                      <option>Class 9</option>
-                      <option>Class 10 (SSLC)</option>
-                      <option>Class 11 (HSC)</option>
-                      <option>Class 12 (HSC)</option>
+                      {standardsList.map(s => (
+                        <option key={s.id || s.name} value={s.name}>{s.name}</option>
+                      ))}
                     </select>
                   </div>
 
@@ -348,13 +487,17 @@ export default function AdminDashboard({
                       onChange={(e) => setVideoSubject(e.target.value)}
                       className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
                     >
-                      <option>Mathematics</option>
-                      <option>Science</option>
-                      <option>English</option>
-                      <option>Tamil</option>
-                      <option>Social Science</option>
-                      <option>Physics</option>
-                      <option>Chemistry</option>
+                      {subjects.filter(s => !videoClass || s.standard === videoClass).map(sub => (
+                        <option key={sub.code} value={sub.name}>{sub.name}</option>
+                      ))}
+                      {subjects.length === 0 && (
+                        <>
+                          <option>Mathematics</option>
+                          <option>Science</option>
+                          <option>English</option>
+                          <option>Tamil</option>
+                        </>
+                      )}
                     </select>
                   </div>
 
@@ -440,14 +583,81 @@ export default function AdminDashboard({
           </div>
         )}
 
-        {/* 3. OTHER SUBPAGES */}
-        {['students', 'teachers', 'fees-coupons', 'classes', 'subjects', 'materials', 'notices', 'settings'].includes(activeMenu) && (
+        {/* 6. FEES & COUPONS */}
+        {activeMenu === 'fees-coupons' && (
+          <div className="space-y-6">
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl space-y-2">
+              <h3 className="text-xl font-extrabold text-white">Fees & Discount Coupons</h3>
+              <p className="text-xs text-slate-400">Manage standard-wise monthly tuition fee slabs and student scholarship promo codes.</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wider">Class Fee Slabs</h4>
+                <div className="divide-y divide-slate-800">
+                  {classList.map(c => (
+                    <div key={c.id || c.name} className="py-2.5 flex justify-between items-center text-xs">
+                      <div>
+                        <p className="font-bold text-white">{c.name}</p>
+                        <p className="text-[10px] text-slate-400">{c.description}</p>
+                      </div>
+                      <span className="font-bold text-emerald-400">₹{c.feeAmount || 150}/mo</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl space-y-3">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wider">Active Coupons</h4>
+                <div className="divide-y divide-slate-800">
+                  {couponList.map(cp => (
+                    <div key={cp.code} className="py-2.5 flex justify-between items-center text-xs">
+                      <div>
+                        <p className="font-mono font-bold text-indigo-400">{cp.code}</p>
+                        <p className="text-[10px] text-slate-400">{cp.description}</p>
+                      </div>
+                      <span className="font-bold text-indigo-300">{cp.discountPercent}% OFF</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 7. CLASSES MATRIX */}
+        {activeMenu === 'classes' && (
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4">
+            <h3 className="text-xl font-extrabold text-white">Class Standards Matrix (Classes 6 to 12)</h3>
+            <p className="text-xs text-slate-400">Curriculum standards configured for TNSCHOOL Samacheer Kalvi and Higher Secondary.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+              {standardsList.map(std => {
+                const count = students.filter(s => s.standard === std.name).length;
+                return (
+                  <div key={std.id || std.name} className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-white text-sm">{std.name}</span>
+                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-[10px] font-bold">
+                        {count} Enrolled
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">{std.description || 'Samacheer Kalvi State Board'}</p>
+                    <p className="text-xs font-semibold text-emerald-400">Tuition Fee: ₹{std.feeAmount || 150}/mo</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 8. OTHER SUBPAGES */}
+        {['materials', 'notices', 'settings'].includes(activeMenu) && (
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6 shadow-xl text-slate-300">
             <div className="flex items-center space-x-3 text-indigo-400">
               <span className="capitalize font-bold text-xl text-white">{activeMenu.replace('-', ' ')} Control</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Managing non-technical administration tools for <strong className="text-white capitalize">{activeMenu.replace('-', ' ')}</strong>.
+              Administrative management panel for <strong className="text-white capitalize">{activeMenu.replace('-', ' ')}</strong>.
             </p>
           </div>
         )}

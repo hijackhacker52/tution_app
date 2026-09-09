@@ -20,9 +20,9 @@ export default function Header({ currentRole, setCurrentRole, activeUser, onLogo
             <div className="flex items-center gap-2">
               <h1 
                 onClick={onBackToPublic}
-                className="font-extrabold text-lg tracking-tight text-white cursor-pointer hover:text-indigo-300 transition-colors"
+                className="font-extrabold text-base sm:text-lg tracking-tight text-white cursor-pointer hover:text-indigo-300 transition-colors"
               >
-                NDT Academy
+                கற்றல் மையம் <span className="text-xs sm:text-sm font-semibold text-indigo-400">(Learning Hub)</span>
               </h1>
               <span className="text-[10px] font-semibold tracking-wider uppercase bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full border border-indigo-500/30">
                 Management Portal

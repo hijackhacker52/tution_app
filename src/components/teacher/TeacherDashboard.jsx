@@ -6,12 +6,12 @@ import {
 import StudyMaterialUploader from './StudyMaterialUploader';
 
 export default function TeacherDashboard({ 
-  teacher, 
-  standardsList,
-  subjects,
-  students, 
-  doubts, 
-  materials,
+  teacher = {}, 
+  standardsList = [],
+  subjects = [],
+  students = [], 
+  doubts = [], 
+  materials = [],
   onClockInToggle, 
   onAnswerDoubt, 
   onMarkAttendance,
@@ -19,7 +19,7 @@ export default function TeacherDashboard({
   onDeleteMaterial
 }) {
   const [activeTab, setActiveTab] = useState('doubts'); // 'doubts' | 'materials' | 'attendance' | 'ai-planner'
-  const [timerSeconds, setTimerSeconds] = useState(teacher.activeSessionSeconds || 0);
+  const [timerSeconds, setTimerSeconds] = useState(teacher?.activeSessionSeconds || 0);
   const [selectedDoubt, setSelectedDoubt] = useState(null);
   const [answerText, setAnswerText] = useState('');
   
@@ -38,13 +38,13 @@ export default function TeacherDashboard({
   // Live timer effect when clocked in
   useEffect(() => {
     let interval;
-    if (teacher.clockedIn) {
+    if (teacher?.clockedIn) {
       interval = setInterval(() => {
         setTimerSeconds(prev => prev + 1);
       }, 1000);
     }
     return () => clearInterval(interval);
-  }, [teacher.clockedIn]);
+  }, [teacher?.clockedIn]);
 
   const formatHoursMinutes = (totalSecs) => {
     const hrs = Math.floor(totalSecs / 3600);

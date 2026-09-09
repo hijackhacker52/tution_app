@@ -16,63 +16,39 @@ import ExamCenter from './components/student/ExamCenter';
 import StudentIdeasLab from './components/student/StudentIdeasLab';
 import TeacherDashboard from './components/teacher/TeacherDashboard';
 import AdminDashboard from './components/admin/AdminDashboard';
-import { initialTuitionData } from './data/tuitionData';
 import Header from './components/common/Header';
+import LoadingExperience from './components/common/LoadingExperience';
+import ErrorExperience from './components/common/ErrorExperience';
+
+import { initialTuitionData } from './data/tuitionData';
 import { authService } from './services/authService';
 
 export default function App() {
   // Navigation & View state
   const [activeTab, setActiveTab] = useState('home');
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState('');
+  const [appError, setAppError] = useState(null);
 
   // Authentication & User Role state
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentRole, setCurrentRole] = useState('student'); // 'student' | 'teacher' | 'admin'
-  const [activeUser, setActiveUser] = useState({
-    id: 'std-103',
-    name: 'Arun Kumar',
-    role: 'Student',
-    gender: 'Male',
-    standard: 'Class 6',
-    rollNo: 'STU0003',
-    feePaid: false
+  const [activeUser, setActiveUser] = useState(null);
+
+  // Master Data State
+  const [data, setData] = useState(() => {
+    const dynamicStudents = authService.getRegisteredStudents();
+    const dynamicTeachers = authService.getRegisteredTeachers();
+    return {
+      ...initialTuitionData,
+      students: dynamicStudents.length > 0 ? dynamicStudents : initialTuitionData.students,
+      teachers: dynamicTeachers.length > 0 ? dynamicTeachers : initialTuitionData.teachers
+    };
   });
 
-  const [data, setData] = useState(initialTuitionData);
-
-  // Restore session from localStorage on mount
-  useEffect(() => {
-    const session = authService.getStoredSession();
-    if (session && session.user) {
-      setActiveUser(session.user);
-      setCurrentRole(session.role || 'student');
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  // Materials & Video Notes state
-  const [materials, setMaterials] = useState([
-    {
-      id: 'mat-1',
-      title: 'Class 10 SSLC Maths Matrices Term 1 Question Paper',
-      standard: 'Class 10 (SSLC)',
-      subject: 'Mathematics (கணிதம்)',
-      fileType: 'Question Paper',
-      fileName: 'Class10_Maths_Matrices_Term1.pdf',
-      uploadedBy: 'Prof. K. Arumugam',
-      uploadedAt: '2026-07-30'
-    },
-    {
-      id: 'mat-2',
-      title: 'Class 6 Science Living World Notes',
-      standard: 'Class 6',
-      subject: 'Science (அறிவியல்)',
-      fileType: 'Study Notes',
-      fileName: 'Class6_Science_LivingWorld_Notes.pdf',
-      uploadedBy: 'Dr. V. Malathi',
-      uploadedAt: '2026-07-31'
-    }
-  ]);
+  // Materials & Video Notes state (Ready for Admin & Teacher uploads)
+  const [materials, setMaterials] = useState([]);
 
   const [videoNotes, setVideoNotes] = useState(initialTuitionData.videoNotes || []);
 
@@ -82,20 +58,129 @@ export default function App() {
   // Birthday modal state
   const [isBirthdayModalOpen, setIsBirthdayModalOpen] = useState(false);
 
+  // Restore session from localStorage on mount
+  useEffect(() => {
+    const session = authService.getStoredSession();
+    if (session && session.user) {
+      setActiveUser(session.user);
+      setCurrentRole((session.role || 'student').toLowerCase());
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  // Keep auth registry in sync whenever students/teachers update
+  useEffect(() => {
+    if (data.students) {
+      authService.saveRegisteredStudents(data.students);
+    }
+  }, [data.students]);
+
+  useEffect(() => {
+    if (data.teachers) {
+      authService.saveRegisteredTeachers(data.teachers);
+    }
+  }, [data.teachers]);
+
+  // Auth Handlers
   const handleLoginSuccess = (user, role) => {
-    setActiveUser(user);
-    setCurrentRole(role.toLowerCase());
-    setIsAuthenticated(true);
-    setIsAuthOpen(false);
-    setActiveTab('dashboard');
+    setLoadingMessage(`Preparing ${role.toUpperCase()} Dashboard...`);
+    setIsLoading(true);
+    setTimeout(() => {
+      setActiveUser(user);
+      setCurrentRole(role.toLowerCase());
+      setIsAuthenticated(true);
+      setIsAuthOpen(false);
+      setActiveTab('dashboard');
+      setIsLoading(false);
+    }, 600);
   };
 
   const handleLogout = async () => {
-    await authService.logout();
-    setIsAuthenticated(false);
-    setActiveTab('home');
+    setLoadingMessage('Signing you out safely...');
+    setIsLoading(true);
+    setTimeout(async () => {
+      await authService.logout();
+      setIsAuthenticated(false);
+      setActiveUser(null);
+      setCurrentRole('student');
+      setActiveTab('home');
+      setIsLoading(false);
+    }, 400);
   };
 
+  // Student Management Handlers
+  const handleAddStudent = (newStudent) => {
+    setData((prev) => ({
+      ...prev,
+      students: [newStudent, ...prev.students]
+    }));
+  };
+
+  const handleUpdateStudent = (updatedStudent) => {
+    setData((prev) => ({
+      ...prev,
+      students: prev.students.map((s) => (s.id === updatedStudent.id ? updatedStudent : s))
+    }));
+    if (activeUser && activeUser.id === updatedStudent.id) {
+      setActiveUser(updatedStudent);
+    }
+  };
+
+  const handleDeleteStudent = (id) => {
+    setData((prev) => ({
+      ...prev,
+      students: prev.students.filter((s) => s.id !== id)
+    }));
+  };
+
+  // Teacher Management Handlers
+  const handleAddTeacher = (newTeacher) => {
+    setData((prev) => ({
+      ...prev,
+      teachers: [newTeacher, ...prev.teachers]
+    }));
+  };
+
+  const handleUpdateTeacher = (updatedTeacher) => {
+    setData((prev) => ({
+      ...prev,
+      teachers: prev.teachers.map((t) => (t.id === updatedTeacher.id ? updatedTeacher : t))
+    }));
+    if (activeUser && activeUser.id === updatedTeacher.id) {
+      setActiveUser(updatedTeacher);
+    }
+  };
+
+  const handleDeleteTeacher = (id) => {
+    setData((prev) => ({
+      ...prev,
+      teachers: prev.teachers.filter((t) => t.id !== id)
+    }));
+  };
+
+  // Subject Management Handlers
+  const handleAddSubject = (newSubject) => {
+    setData((prev) => ({
+      ...prev,
+      subjects: [newSubject, ...prev.subjects]
+    }));
+  };
+
+  const handleUpdateSubject = (updatedSubject) => {
+    setData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.map((s) => (s.code === updatedSubject.code ? updatedSubject : s))
+    }));
+  };
+
+  const handleDeleteSubject = (code) => {
+    setData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.filter((s) => s.code !== code)
+    }));
+  };
+
+  // Study Materials Handlers
   const handleUploadMaterial = (newMat) => {
     setMaterials((prev) => [newMat, ...prev]);
   };
@@ -104,6 +189,7 @@ export default function App() {
     setMaterials((prev) => prev.filter((m) => m.id !== id));
   };
 
+  // Video Notes Handlers
   const handleUploadVideoNote = (newVid) => {
     setVideoNotes((prev) => [newVid, ...prev]);
   };
@@ -112,6 +198,7 @@ export default function App() {
     setVideoNotes((prev) => prev.filter((v) => v.id !== id));
   };
 
+  // Clock in toggle for teachers
   const handleClockInToggle = (teacherId) => {
     setData((prev) => ({
       ...prev,
@@ -130,6 +217,7 @@ export default function App() {
     }));
   };
 
+  // Substitute staff for teachers
   const handleSubstituteStaff = (teacherId, substituteId) => {
     setData((prev) => ({
       ...prev,
@@ -156,9 +244,9 @@ export default function App() {
       case 'classes':
         return <ClassesPage />;
       case 'subjects':
-        return <SubjectsPage />;
+        return <SubjectsPage subjects={data.subjects} standardsList={data.standardsList} />;
       case 'teachers':
-        return <TeachersPage />;
+        return <TeachersPage teachers={data.teachers} />;
       case 'gallery':
         return <GalleryPage />;
       case 'notices':
@@ -169,8 +257,24 @@ export default function App() {
     }
   };
 
-  // Render Portal Dashboard View
+  // Render Portal Dashboard View with Strict Role Guarding
   const renderDashboardContent = () => {
+    // Security check: Must be authenticated
+    if (!isAuthenticated || !activeUser) {
+      return (
+        <div className="text-center py-16 space-y-4">
+          <p className="text-sm text-slate-400">Please sign in to access your authorized academy dashboard.</p>
+          <button
+            onClick={() => setIsAuthOpen(true)}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-xs font-bold"
+          >
+            Open Portal Login
+          </button>
+        </div>
+      );
+    }
+
+    // STUDENT PORTAL
     if (currentRole === 'student') {
       if (studentView === 'chat') {
         return (
@@ -212,26 +316,38 @@ export default function App() {
       );
     }
 
+    // TEACHER PORTAL
     if (currentRole === 'teacher') {
       return (
         <TeacherDashboard
-          activeUser={activeUser}
-          data={data}
+          teacher={activeUser}
+          standardsList={data.standardsList}
+          subjects={data.subjects}
+          students={data.students}
+          doubts={data.doubts || []}
           materials={materials}
           onUploadMaterial={handleUploadMaterial}
           onDeleteMaterial={handleDeleteMaterial}
           onClockInToggle={handleClockInToggle}
           onSubstituteStaff={handleSubstituteStaff}
+          onAnswerDoubt={(doubtId, ans) => {
+            console.log('Answer doubt:', doubtId, ans);
+          }}
+          onMarkAttendance={(att) => {
+            console.log('Attendance marked:', att);
+          }}
         />
       );
     }
 
+    // ADMIN PORTAL (Only users with verified admin role)
     if (currentRole === 'admin') {
       return (
         <AdminDashboard
           centerInfo={data.centerInfo}
           teachers={data.teachers}
           students={data.students}
+          subjects={data.subjects}
           exams={data.exams}
           notices={data.notices}
           materials={materials}
@@ -240,61 +356,99 @@ export default function App() {
           coupons={data.coupons}
           onUploadVideoNote={handleUploadVideoNote}
           onDeleteVideoNote={handleDeleteVideoNote}
+          onAddStudent={handleAddStudent}
+          onUpdateStudent={handleUpdateStudent}
+          onDeleteStudent={handleDeleteStudent}
+          onAddTeacher={handleAddTeacher}
+          onUpdateTeacher={handleUpdateTeacher}
+          onDeleteTeacher={handleDeleteTeacher}
+          onAddSubject={handleAddSubject}
+          onUpdateSubject={handleUpdateSubject}
+          onDeleteSubject={handleDeleteSubject}
         />
       );
     }
 
-    return null;
+    // Fallback: unauthorized role
+    return (
+      <div className="text-center py-16 space-y-3">
+        <h4 className="text-base font-bold text-white">Access Restricted</h4>
+        <p className="text-xs text-slate-400">You do not possess the required credentials for this dashboard.</p>
+        <button
+          onClick={() => setActiveTab('home')}
+          className="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-semibold"
+        >
+          Return to Public Website
+        </button>
+      </div>
+    );
   };
 
-  // Dedicated Auth Modal Screen
-  if (isAuthOpen) {
+  // Error boundary display
+  if (appError) {
     return (
-      <DedicatedAuthScreen
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={handleLoginSuccess}
+      <ErrorExperience
+        error={appError}
+        onRetry={() => {
+          setAppError(null);
+          window.location.reload();
+        }}
+        onGoHome={() => {
+          setAppError(null);
+          setActiveTab('home');
+        }}
       />
     );
   }
 
-  // Dashboard View Container
-  if (activeTab === 'dashboard') {
-    return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <Header
-          currentRole={currentRole}
-          setCurrentRole={setCurrentRole}
-          activeUser={activeUser}
-          onLogout={handleLogout}
-          onBackToPublic={() => setActiveTab('home')}
-          onOpenBirthdayModal={() => setIsBirthdayModalOpen(true)}
-        />
-
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-          {renderDashboardContent()}
-        </main>
-
-        {isBirthdayModalOpen && (
-          <BirthdayModal
-            user={activeUser}
-            onClose={() => setIsBirthdayModalOpen(false)}
-          />
-        )}
-      </div>
-    );
-  }
-
-  // Default Public Website View
   return (
-    <PublicLayout
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      onOpenAuth={() => setIsAuthOpen(true)}
-      isAuthenticated={isAuthenticated}
-      currentRole={currentRole}
-      onLogout={handleLogout}
-    >
-      {renderPublicContent()}
-    </PublicLayout>
+    <>
+      {/* Cute Dog/Cat Loading Screen */}
+      {isLoading && <LoadingExperience message={loadingMessage} />}
+
+      {/* Dedicated Auth Modal Screen */}
+      {isAuthOpen && (
+        <DedicatedAuthScreen
+          onClose={() => setIsAuthOpen(false)}
+          onLoginSuccess={handleLoginSuccess}
+        />
+      )}
+
+      {/* Dashboard View Container */}
+      {activeTab === 'dashboard' ? (
+        <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-indigo-500 selection:text-white">
+          <Header
+            currentRole={currentRole}
+            activeUser={activeUser || { name: 'Portal User', role: currentRole }}
+            onLogout={handleLogout}
+            onBackToPublic={() => setActiveTab('home')}
+            onOpenBirthdayModal={() => setIsBirthdayModalOpen(true)}
+          />
+
+          <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+            {renderDashboardContent()}
+          </main>
+
+          {isBirthdayModalOpen && (
+            <BirthdayModal
+              user={activeUser || { name: 'Scholar' }}
+              onClose={() => setIsBirthdayModalOpen(false)}
+            />
+          )}
+        </div>
+      ) : (
+        /* Default Public Website View */
+        <PublicLayout
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onOpenAuth={() => setIsAuthOpen(true)}
+          isAuthenticated={isAuthenticated}
+          currentRole={currentRole}
+          onLogout={handleLogout}
+        >
+          {renderPublicContent()}
+        </PublicLayout>
+      )}
+    </>
   );
 }

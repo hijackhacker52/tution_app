@@ -41,7 +41,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuth, isAuthenti
             <div>
               <div className="flex items-center space-x-1.5">
                 <span className="text-xl font-extrabold tracking-tight bg-gradient-to-r from-gray-900 via-indigo-950 to-gray-800 bg-clip-text text-transparent">
-                  NDT Academy
+                  கற்றல் மையம் <span className="text-sm font-bold text-indigo-600 block sm:inline">(Learning Hub)</span>
                 </span>
                 <span className="bg-indigo-50 text-indigo-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-indigo-100 hidden sm:inline-block">
                   State Board

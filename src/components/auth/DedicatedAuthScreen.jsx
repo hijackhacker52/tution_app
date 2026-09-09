@@ -30,11 +30,23 @@ export default function DedicatedAuthScreen({ onClose, onLoginSuccess }) {
     setErrorMessage('');
     setSuccessMessage('');
     if (role === 'student') {
-      setEmailInput('student1@ndt.com');
-      setPasswordInput('Student1#2026');
+      const students = authService.getRegisteredStudents();
+      if (students && students.length > 0) {
+        setEmailInput(students[0].email || students[0].studentId || '');
+        setPasswordInput('Student1#2026');
+      } else {
+        setEmailInput('');
+        setPasswordInput('');
+      }
     } else if (role === 'teacher') {
-      setEmailInput('teacher1@ndt.com');
-      setPasswordInput('Teacher1#2026');
+      const teachers = authService.getRegisteredTeachers();
+      if (teachers && teachers.length > 0) {
+        setEmailInput(teachers[0].email || teachers[0].id || '');
+        setPasswordInput('Teacher1#2026');
+      } else {
+        setEmailInput('');
+        setPasswordInput('');
+      }
     } else {
       setEmailInput('naveenpanneerselvam78@gmail.com');
       setPasswordInput('Admin#2026!');
@@ -113,7 +125,7 @@ export default function DedicatedAuthScreen({ onClose, onLoginSuccess }) {
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-3">
             <GraduationCap className="w-7 h-7" />
           </div>
-          <h2 className="text-xl font-extrabold text-white tracking-tight">NDT Tuition Academy</h2>
+          <h2 className="text-xl font-extrabold text-white tracking-tight">கற்றல் மையம் (Learning Hub)</h2>
           <p className="text-xs text-indigo-200 mt-1">Management Platform & Student Portal</p>
         </div>
 
@@ -179,8 +191,8 @@ export default function DedicatedAuthScreen({ onClose, onLoginSuccess }) {
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
                     placeholder={
-                      activeRole === 'student' ? 'student1@ndt.com' :
-                      activeRole === 'teacher' ? 'teacher1@ndt.com' :
+                      activeRole === 'student' ? 'e.g. student@academy.com or Student ID' :
+                      activeRole === 'teacher' ? 'e.g. teacher@academy.com or Teacher ID' :
                       'naveenpanneerselvam78@gmail.com'
                     }
                     className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500 transition-colors"

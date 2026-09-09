@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { BookOpen, Check, Search, Filter } from 'lucide-react';
 import { initialTuitionData } from '../../data/tuitionData';
 
-export default function SubjectsPage() {
-  const { subjects, standardsList } = initialTuitionData;
+export default function SubjectsPage({ subjects: customSubjects, standardsList: customStandards }) {
+  const subjects = customSubjects || initialTuitionData.subjects || [];
+  const standardsList = customStandards || initialTuitionData.standardsList || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStandard, setSelectedStandard] = useState('all');
 

@@ -20,7 +20,7 @@ export default function Footer({ setActiveTab, onOpenAuth }) {
                 <GraduationCap className="w-6 h-6" />
               </div>
               <span className="text-xl font-bold text-white tracking-tight">
-                NDT Tuition Academy
+                கற்றல் மையம் <span className="text-sm font-semibold text-indigo-400">(Learning Hub)</span>
               </span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed">
@@ -86,7 +86,7 @@ export default function Footer({ setActiveTab, onOpenAuth }) {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} NDT Tuition Academy. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} கற்றல் மையம் (Learning Hub). All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
             <span className="hover:text-slate-400 cursor-pointer">Privacy Policy</span>
             <span className="hover:text-slate-400 cursor-pointer">Terms of Service</span>
