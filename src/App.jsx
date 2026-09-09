@@ -279,7 +279,9 @@ export default function App() {
       if (studentView === 'chat') {
         return (
           <DistractionFreeChat
-            activeUser={activeUser}
+            student={activeUser}
+            subjects={data.subjects}
+            teachers={data.teachers}
             onBack={() => setStudentView('dashboard')}
           />
         );

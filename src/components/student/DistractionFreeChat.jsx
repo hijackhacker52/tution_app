@@ -3,47 +3,52 @@ import {
   Send, PhoneCall, Video, Image as ImageIcon, Sparkles, X, 
   ArrowLeft, CheckCircle2, Bot, User, Mic, MicOff, Volume2, ShieldCheck, Paperclip
 } from 'lucide-react';
+import { aiDoubtService } from '../../services/aiDoubtService';
 
 export default function DistractionFreeChat({ 
-  student, 
+  student = {}, 
   subjectCode, 
-  subjects, 
-  teachers, 
-  doubts, 
+  subjects = [], 
+  teachers = [], 
+  doubts = [], 
   onSendDoubtMessage, 
   onBack 
 }) {
-  const currentSubject = subjects.find(s => s.code === subjectCode) || subjects[0];
-  const primaryTeacher = teachers.find(t => t.id === currentSubject.teacherId);
+  const currentSubject = (subjects && subjects.find(s => s.code === subjectCode)) || (subjects && subjects[0]) || { name: 'Mathematics', code: 'TN10-MAT' };
+  const primaryTeacher = teachers && teachers.find(t => t.id === currentSubject.assignedTeacherId || t.id === currentSubject.teacherId);
   const isSubstituted = primaryTeacher?.onLeave;
   const activeTeacher = isSubstituted ? teachers.find(t => t.id === primaryTeacher.substituteAssignedId) : primaryTeacher;
 
   // Active doubt thread
-  const existingDoubt = doubts.find(d => d.subjectCode === currentSubject.code && d.studentId === student.id);
+  const existingDoubt = doubts && doubts.find(d => d.subjectCode === currentSubject.code && d.studentId === student.id);
 
   const [messages, setMessages] = useState(existingDoubt?.messages || [
     {
       sender: 'teacher',
-      text: `Hello ${student.name}! I am ${activeTeacher?.name}, your allocated specialist for ${currentSubject.name}. How can I assist you with your doubts today?`,
+      text: activeTeacher 
+        ? `Hello ${student.name || 'Student'}! I am ${activeTeacher.name}, your allocated specialist for ${currentSubject.name}. How can I assist you with your doubts today?`
+        : `Hello ${student.name || 'Student'}! Your subject teacher for ${currentSubject.name} is currently offline. You can toggle the 24/7 AI Tutor switch above to clear your doubts immediately!`,
       time: 'Just now'
     }
   ]);
 
   const [inputMessage, setInputMessage] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
-  const [isAiMode, setIsAiMode] = useState(false);
+  const [isAiMode, setIsAiMode] = useState(!activeTeacher); // Default to AI mode if teacher offline
   const [showCallModal, setShowCallModal] = useState(false);
   const [callType, setCallType] = useState('audio'); // 'audio' | 'video'
   const [isMuted, setIsMuted] = useState(false);
   const [callDuration, setCallDuration] = useState(14); // seconds
+  const [isAiThinking, setIsAiThinking] = useState(false);
 
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim() && !selectedImage) return;
 
+    const queryText = inputMessage;
     const newMsg = {
       sender: 'student',
-      text: inputMessage,
+      text: queryText,
       image: selectedImage,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
@@ -53,28 +58,49 @@ export default function DistractionFreeChat({
     setInputMessage('');
     setSelectedImage(null);
 
-    // Simulate response (AI Tutor or Human Teacher)
-    setTimeout(() => {
-      if (isAiMode) {
+    // AI or Teacher response
+    if (isAiMode || !activeTeacher) {
+      setIsAiThinking(true);
+      try {
+        const aiResponse = await aiDoubtService.solveDoubt({
+          prompt: queryText,
+          subject: currentSubject.name,
+          standard: student.standard || 'Class 10 (SSLC)',
+          studentName: student.name || 'Student'
+        });
+
         setMessages(prev => [
           ...prev,
           {
             sender: 'ai-tutor',
-            text: `🤖 OmniAI Tutor Step-by-Step Explanation: To solve this doubt in ${currentSubject.name}, break down the equation into boundary conditions. Step 1: Isolate variables. Step 2: Integrate over bounds. You can verify this result with ${activeTeacher?.name}.`,
+            text: `✨ ${aiResponse.provider}:\n\n${aiResponse.content}`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
-      } else {
+      } catch (err) {
+        setMessages(prev => [
+          ...prev,
+          {
+            sender: 'ai-tutor',
+            text: `⚠️ Could not generate answer: ${err.message}. Please try again.`,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+      } finally {
+        setIsAiThinking(false);
+      }
+    } else {
+      setTimeout(() => {
         setMessages(prev => [
           ...prev,
           {
             sender: 'teacher',
-            text: `Got your doubt, ${student.name}! I have reviewed your submission. Let's schedule a 2-minute quick call if you need live step-by-step guidance!`,
+            text: `Got your doubt, ${student.name || 'Student'}! I have reviewed your question. Let's schedule a 2-minute quick call if you need live step-by-step guidance!`,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
           }
         ]);
-      }
-    }, 1200);
+      }, 1000);
+    }
   };
 
   const handleImageSelect = (e) => {

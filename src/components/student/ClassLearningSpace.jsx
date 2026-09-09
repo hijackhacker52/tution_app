@@ -7,6 +7,7 @@ import {
   Film
 } from 'lucide-react';
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../utils/youtubeUtils';
+import AiDoubtSolver from './AiDoubtSolver';
 
 export default function ClassLearningSpace({ 
   student = {}, 
@@ -108,6 +109,7 @@ export default function ClassLearningSpace({
     { id: 'home', label: 'Home', icon: HomeIcon },
     { id: 'notes', label: 'Notes', icon: FileText },
     { id: 'subjects', label: 'Subjects', icon: Layers },
+    { id: 'ai-tutor', label: 'AI Doubt Solver', icon: Sparkles, badge: '24/7' },
     { id: 'contact', label: 'Contact', icon: User },
     { id: 'call', label: 'Call', icon: Phone },
     { id: 'chat', label: 'Chat', icon: MessageSquare }
@@ -140,6 +142,11 @@ export default function ClassLearningSpace({
               >
                 <Icon className="w-4 h-4" />
                 <span>{tab.label}</span>
+                {tab.badge && (
+                  <span className="px-1.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[9px] font-bold border border-pink-500/30 ml-0.5">
+                    {tab.badge}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -172,9 +179,33 @@ export default function ClassLearningSpace({
             </p>
           </div>
 
+          {/* 24/7 AI Doubt Solver Spotlight Card */}
+          <div className="bg-gradient-to-r from-purple-950 via-indigo-950 to-slate-900 border border-purple-500/30 p-6 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="space-y-1.5">
+              <div className="flex items-center space-x-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-purple-500/30 text-purple-200 text-[10px] font-extrabold uppercase tracking-wider border border-purple-400/30 flex items-center space-x-1">
+                  <Sparkles className="w-3 h-3 text-amber-300" />
+                  <span>24/7 Student AI Doubt Solver</span>
+                </span>
+                <span className="text-xs text-indigo-300">• Powered by Google Gemini</span>
+              </div>
+              <h3 className="text-lg font-bold text-white">Got a doubt late at night or when teachers are unavailable?</h3>
+              <p className="text-xs text-purple-200 max-w-xl">
+                Get step-by-step mathematical proofs, science diagrams, Tamil grammar, and board exam answers instantly.
+              </p>
+            </div>
+            <button
+              onClick={() => setActiveTab('ai-tutor')}
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 flex items-center space-x-2 transition-all shrink-0 transform active:scale-95"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              <span>Ask AI Tutor Now</span>
+            </button>
+          </div>
+
           <div className="space-y-4">
             <h3 className="font-bold text-slate-900 text-base">Quick Access Cards</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3.5">
               {navTabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
@@ -196,6 +227,17 @@ export default function ClassLearningSpace({
             </div>
           </div>
         </div>
+      )}
+
+      {/* AI DOUBT SOLVER TAB */}
+      {activeTab === 'ai-tutor' && (
+        <AiDoubtSolver
+          student={student}
+          subjects={subjects}
+          teachers={teachers}
+          assignedClass={assignedClass}
+          onBack={() => setActiveTab('home')}
+        />
       )}
 
       {/* 2. NOTES TAB (STUDY NOTES & VIDEO NOTES SUB-TABS) */}
@@ -508,6 +550,26 @@ export default function ClassLearningSpace({
           <div className="flex items-center space-x-2 text-indigo-400">
             <MessageSquare className="w-5 h-5" />
             <h2 className="text-xl font-extrabold text-white">{assignedClass} Doubt Clearance Chat</h2>
+          </div>
+
+          {/* Teacher Offline / Quick Jump to AI Banner */}
+          <div className="bg-gradient-to-r from-purple-950/80 to-indigo-950/80 border border-purple-500/30 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-lg">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center shrink-0 border border-purple-500/30">
+                <Sparkles className="w-4 h-4 text-purple-300" />
+              </div>
+              <div>
+                <p className="text-xs font-bold text-white">Need an instant answer or is faculty outside tuition hours?</p>
+                <p className="text-[11px] text-purple-200">Our 24/7 AI Doubt Solver (Google Gemini & Educational AI) is available 24 hours a day.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('ai-tutor')}
+              className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md shadow-purple-600/30 transition-all shrink-0 flex items-center space-x-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+              <span>Launch 24/7 AI Solver</span>
+            </button>
           </div>
 
           <div className="bg-slate-950 rounded-2xl border border-slate-800 p-4 space-y-4 min-h-[300px] flex flex-col justify-between">
