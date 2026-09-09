@@ -5,6 +5,7 @@ import {
   Tag, CreditCard, Power, ExternalLink, Film, CheckCircle2, X
 } from 'lucide-react';
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../utils/youtubeUtils';
+import { initialTuitionData } from '../../data/tuitionData';
 import StudentManagement from './StudentManagement';
 import TeacherManagement from './TeacherManagement';
 import SubjectManagement from './SubjectManagement';
@@ -18,6 +19,7 @@ export default function AdminDashboard({
   materials = [],
   videoNotes = [],
   standardsList = [],
+  boardsList = initialTuitionData.boardsList || [],
   coupons = [],
   onUploadVideoNote,
   onDeleteVideoNote,
@@ -392,6 +394,7 @@ export default function AdminDashboard({
           <StudentManagement
             students={students}
             standardsList={standardsList}
+            boardsList={boardsList}
             onAddStudent={onAddStudent}
             onUpdateStudent={onUpdateStudent}
             onDeleteStudent={onDeleteStudent}
@@ -415,6 +418,7 @@ export default function AdminDashboard({
           <SubjectManagement
             subjects={subjects}
             standardsList={standardsList}
+            boardsList={boardsList}
             teachers={teachers}
             onAddSubject={onAddSubject}
             onUpdateSubject={onUpdateSubject}

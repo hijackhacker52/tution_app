@@ -5,8 +5,10 @@ import { initialTuitionData } from '../../data/tuitionData';
 export default function SubjectsPage({ subjects: customSubjects, standardsList: customStandards }) {
   const subjects = customSubjects || initialTuitionData.subjects || [];
   const standardsList = customStandards || initialTuitionData.standardsList || [];
+  const boardsList = initialTuitionData.boardsList || [];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStandard, setSelectedStandard] = useState('all');
+  const [selectedBoard, setSelectedBoard] = useState('all');
 
   const filteredSubjects = subjects.filter((subj) => {
     const matchesSearch = 
@@ -15,8 +17,12 @@ export default function SubjectsPage({ subjects: customSubjects, standardsList: 
       subj.description.toLowerCase().includes(searchQuery.toLowerCase());
     
     const matchesStandard = selectedStandard === 'all' || subj.standard === selectedStandard;
+    const matchesBoard = 
+      selectedBoard === 'all' || 
+      subj.board === selectedBoard || 
+      (!subj.board && selectedBoard === 'Tamil Nadu State Board (Samacheer Kalvi)');
 
-    return matchesSearch && matchesStandard;
+    return matchesSearch && matchesStandard && matchesBoard;
   });
 
   return (
@@ -28,9 +34,9 @@ export default function SubjectsPage({ subjects: customSubjects, standardsList: 
           <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-400/20">
             Subject Catalog
           </span>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Dynamic Subject Folders</h1>
+          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Multi-Board Subject Folders</h1>
           <p className="text-indigo-200 max-w-2xl mx-auto text-base">
-            Comprehensive breakdown of State Board subjects across Class 6 to Class 12.
+            Comprehensive curriculum breakdown across Tamil Nadu State Board, CBSE, ICSE, and Cambridge standards.
           </p>
         </div>
       </section>
@@ -40,28 +46,41 @@ export default function SubjectsPage({ subjects: customSubjects, standardsList: 
         <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
           
           {/* Search Input */}
-          <div className="relative w-full md:w-96">
+          <div className="relative w-full md:w-80">
             <Search className="w-5 h-5 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search subjects (e.g. Maths, Science, Physics)..."
+              placeholder="Search subjects (e.g. Maths, Science)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
           </div>
 
-          {/* Filter Dropdown */}
-          <div className="flex items-center space-x-3 w-full md:w-auto">
-            <Filter className="w-4 h-4 text-gray-500" />
+          {/* Filter Dropdowns */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-4 h-4 text-gray-500" />
+              <select
+                value={selectedStandard}
+                onChange={(e) => setSelectedStandard(e.target.value)}
+                className="px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="all">All Standards</option>
+                {standardsList.map((std) => (
+                  <option key={std.id} value={std.name}>{std.name}</option>
+                ))}
+              </select>
+            </div>
+
             <select
-              value={selectedStandard}
-              onChange={(e) => setSelectedStandard(e.target.value)}
-              className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              value={selectedBoard}
+              onChange={(e) => setSelectedBoard(e.target.value)}
+              className="px-3.5 py-2.5 rounded-xl border border-gray-200 text-xs sm:text-sm font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
-              <option value="all">All Standards (Class 6 - 12)</option>
-              {standardsList.map((std) => (
-                <option key={std.id} value={std.name}>{std.name}</option>
+              <option value="all">All Curricula / Boards</option>
+              {boardsList.map((b) => (
+                <option key={b.id || b.code} value={b.name}>{b.name}</option>
               ))}
             </select>
           </div>
@@ -88,6 +107,9 @@ export default function SubjectsPage({ subjects: customSubjects, standardsList: 
                     <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full">
                       {subj.standard}
                     </div>
+                    <div className="absolute top-4 right-4 bg-indigo-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                      {subj.board ? subj.board.split(' ')[0] : 'TN State'}
+                    </div>
                   </div>
 
                   <div className="p-6 space-y-3">
@@ -100,7 +122,7 @@ export default function SubjectsPage({ subjects: customSubjects, standardsList: 
                 <div className="p-6 pt-0 border-t border-gray-100 flex items-center justify-between mt-4">
                   <span className="text-xs font-semibold text-emerald-600 flex items-center space-x-1">
                     <Check className="w-4 h-4" />
-                    <span>Samacheer Syllabus</span>
+                    <span>{subj.board ? subj.board.split(' ')[0] : 'Samacheer'} Curriculum</span>
                   </span>
                   <span className="text-xs font-bold text-slate-500">Subject Folder</span>
                 </div>

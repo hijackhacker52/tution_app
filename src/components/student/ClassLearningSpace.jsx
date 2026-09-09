@@ -4,10 +4,11 @@ import {
   Sparkles, Clock, CheckCircle2, Lock, Download, AlertCircle, PhoneCall, 
   Video, Mic, MicOff, Volume2, X, ChevronRight, Send, ArrowLeft, ShieldAlert,
   Users, Mail, Award, CalendarCheck, BookOpen, Play, Search, Filter, ExternalLink,
-  Film
+  Film, Edit3
 } from 'lucide-react';
 import { extractYouTubeVideoId, getYouTubeThumbnailUrl } from '../../utils/youtubeUtils';
 import AiDoubtSolver from './AiDoubtSolver';
+import SelfNotesVault from './SelfNotesVault';
 
 export default function ClassLearningSpace({ 
   student = {}, 
@@ -24,6 +25,7 @@ export default function ClassLearningSpace({
   // Security Checks: Get student's assigned class & student ID
   const studentId = student.studentId || student.rollNo || 'STU0001';
   const assignedClass = student.standard || 'Class 6';
+  const studentBoard = student.board || 'Tamil Nadu State Board';
 
   // Notes Sub-tab: 'study-notes' | 'video-notes'
   const [notesSubTab, setNotesSubTab] = useState('study-notes');
@@ -121,8 +123,10 @@ export default function ClassLearningSpace({
       {/* Horizontal Class Learning Space Menu Bar */}
       <header className="bg-slate-900 text-white rounded-3xl p-3 shadow-xl border border-slate-800 flex items-center justify-between overflow-x-auto no-scrollbar">
         <div className="flex items-center space-x-1.5">
-          <div className="px-3.5 py-2 rounded-xl bg-indigo-600/20 text-indigo-300 font-extrabold text-xs border border-indigo-500/30 uppercase tracking-wider mr-2 shrink-0">
-            {assignedClass} Space
+          <div className="px-3.5 py-2 rounded-xl bg-indigo-600/20 text-indigo-300 font-extrabold text-xs border border-indigo-500/30 uppercase tracking-wider mr-2 shrink-0 flex items-center space-x-1.5">
+            <span>{assignedClass}</span>
+            <span className="text-indigo-400/60">•</span>
+            <span className="text-[10px] font-bold text-indigo-200">{studentBoard.split(' ')[0]}</span>
           </div>
           {navTabs.map((tab) => {
             const Icon = tab.icon;
@@ -274,6 +278,18 @@ export default function ClassLearningSpace({
               >
                 <Film className="w-4 h-4" />
                 <span>🎥 Video Notes</span>
+              </button>
+
+              <button
+                onClick={() => setNotesSubTab('self-notes')}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  notesSubTab === 'self-notes'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Edit3 className="w-4 h-4" />
+                <span>✍️ My Self Notes</span>
               </button>
             </div>
           </div>
@@ -437,6 +453,15 @@ export default function ClassLearningSpace({
               )}
 
             </div>
+          )}
+
+          {/* SUB-TAB 3: MY SELF NOTES (WHITE PAGE DIGITAL NOTEPAD & AUTO-SAVE) */}
+          {notesSubTab === 'self-notes' && (
+            <SelfNotesVault
+              student={student}
+              subjects={subjects}
+              assignedClass={assignedClass}
+            />
           )}
 
         </div>

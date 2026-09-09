@@ -3,14 +3,20 @@ import { BookOpen, CheckCircle, ShieldCheck, Tag } from 'lucide-react';
 import { initialTuitionData } from '../../data/tuitionData';
 
 export default function ClassesPage() {
-  const { standardsList, subjects } = initialTuitionData;
-  const [selectedStandard, setSelectedStandard] = useState(standardsList[4]?.name || 'Class 10 (SSLC)');
+  const { standardsList, subjects, boardsList = [] } = initialTuitionData;
+  const [selectedStandard, setSelectedStandard] = useState(standardsList[4]?.name || 'Class 10 (SSLC / Secondary)');
+  const [selectedBoard, setSelectedBoard] = useState('all');
 
   const currentClassObj = standardsList.find(s => s.name === selectedStandard) || standardsList[0];
 
-  const filteredSubjects = subjects.filter(
-    (subj) => subj.standard === selectedStandard
-  );
+  const filteredSubjects = subjects.filter((subj) => {
+    const matchesStandard = subj.standard === selectedStandard;
+    const matchesBoard = 
+      selectedBoard === 'all' || 
+      subj.board === selectedBoard || 
+      (!subj.board && selectedBoard === 'Tamil Nadu State Board (Samacheer Kalvi)');
+    return matchesStandard && matchesBoard;
+  });
 
   return (
     <div className="space-y-16 pb-16">
@@ -19,17 +25,53 @@ export default function ClassesPage() {
       <section className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <span className="text-indigo-400 text-xs font-bold uppercase tracking-widest bg-indigo-500/10 px-3 py-1 rounded-full border border-indigo-400/20">
-            Academic Folder Database
+            Multi-Curriculum Academic Folders
           </span>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">Class 6 to Class 12 Course Folders</h1>
           <p className="text-indigo-200 max-w-2xl mx-auto text-base">
-            Structured subject folder database for Tamil Nadu State Board (Samacheer Kalvi) standards.
+            Structured subject folder database for Tamil Nadu State Board (Samacheer Kalvi), CBSE, ICSE, and Cambridge curricula.
           </p>
         </div>
       </section>
 
-      {/* Class Selector Tabs */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Curriculum Board & Class Selector Controls */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+        {/* Board Selector Filter */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-gray-200 shadow-sm">
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-bold text-gray-700 uppercase tracking-wider">Educational Board:</span>
+          </div>
+          <div className="flex items-center space-x-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0 no-scrollbar">
+            <button
+              onClick={() => setSelectedBoard('all')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                selectedBoard === 'all'
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              All Boards
+            </button>
+            {boardsList.map((board) => {
+              const isActive = selectedBoard === board.name;
+              return (
+                <button
+                  key={board.id || board.code}
+                  onClick={() => setSelectedBoard(board.name)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-sm'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {board.shortName || board.name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Class Selector Tabs */}
         <div className="flex items-center space-x-2 overflow-x-auto pb-4 no-scrollbar border-b border-gray-200">
           {standardsList.map((std) => {
             const isActive = std.name === selectedStandard;
@@ -91,7 +133,12 @@ export default function ClassesPage() {
                       className="w-full h-36 object-cover rounded-xl border border-slate-200"
                     />
                     <div>
-                      <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">{subj.code}</span>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">{subj.code}</span>
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                          {subj.board ? subj.board.split(' ')[0] : 'TN State'}
+                        </span>
+                      </div>
                       <h4 className="font-bold text-lg text-slate-900 mt-0.5">{subj.name}</h4>
                       <p className="text-xs text-gray-500 mt-2 leading-relaxed">{subj.description}</p>
                     </div>

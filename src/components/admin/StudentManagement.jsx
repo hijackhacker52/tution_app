@@ -5,15 +5,21 @@ import {
   Calendar, CreditCard, Mail, Key, User, Phone, BookOpen, AlertTriangle
 } from 'lucide-react';
 
+import { initialTuitionData } from '../../data/tuitionData';
+
 export default function StudentManagement({ 
   students = [], 
   standardsList = [], 
+  boardsList = initialTuitionData.boardsList || [],
   onAddStudent, 
   onUpdateStudent, 
   onDeleteStudent 
 }) {
+  const defaultBoard = boardsList[0]?.name || 'Tamil Nadu State Board (Samacheer Kalvi)';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterClass, setFilterClass] = useState('all');
+  const [filterBoard, setFilterBoard] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
 
   // Modals
@@ -31,6 +37,7 @@ export default function StudentManagement({
     email: '',
     studentId: '',
     standard: standardsList[0]?.name || 'Class 6',
+    board: defaultBoard,
     gender: 'Male',
     dob: '2012-01-01',
     temporaryPassword: '',
@@ -55,6 +62,10 @@ export default function StudentManagement({
       sId.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesClass = filterClass === 'all' || s.standard === filterClass;
+    const matchesBoard = 
+      filterBoard === 'all' || 
+      s.board === filterBoard || 
+      (!s.board && filterBoard === defaultBoard);
     const matchesStatus = 
       filterStatus === 'all' ||
       (filterStatus === 'active' && s.isActive !== false) ||
@@ -62,7 +73,7 @@ export default function StudentManagement({
       (filterStatus === 'paid' && s.feePaid) ||
       (filterStatus === 'unpaid' && !s.feePaid);
 
-    return matchesSearch && matchesClass && matchesStatus;
+    return matchesSearch && matchesClass && matchesBoard && matchesStatus;
   });
 
   // Open Add Modal with generated default Student ID
@@ -108,6 +119,7 @@ export default function StudentManagement({
       dob: formData.dob,
       role: 'Student',
       standard: formData.standard,
+      board: formData.board || defaultBoard,
       feePaid: Boolean(formData.feePaid),
       feeAmount: Number(formData.feeAmount) || 150,
       attendanceRate: 100,
@@ -237,6 +249,17 @@ export default function StudentManagement({
           </select>
 
           <select
+            value={filterBoard}
+            onChange={(e) => setFilterBoard(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500 shrink-0"
+          >
+            <option value="all">All Boards</option>
+            {boardsList.map((b) => (
+              <option key={b.id || b.name} value={b.name}>{b.shortName || b.name}</option>
+            ))}
+          </select>
+
+          <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-indigo-500 shrink-0"
@@ -315,11 +338,17 @@ export default function StudentManagement({
                         </div>
                       </td>
 
-                      {/* Class */}
+                      {/* Class & Board */}
                       <td className="py-3.5 px-4">
-                        <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-[11px] border border-indigo-500/30">
-                          {student.standard}
-                        </span>
+                        <div className="space-y-1">
+                          <span className="px-2.5 py-1 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-[11px] border border-indigo-500/30 inline-block">
+                            {student.standard}
+                          </span>
+                          <div className="text-[10px] text-emerald-400 font-medium flex items-center space-x-1">
+                            <span>🎓</span>
+                            <span>{student.board || defaultBoard}</span>
+                          </div>
+                        </div>
                       </td>
 
                       {/* Student ID */}
@@ -474,6 +503,22 @@ export default function StudentManagement({
                 </div>
               </div>
 
+              {/* Educational Board / Curriculum Selector */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Educational Board / Curriculum *</label>
+                <select
+                  value={formData.board}
+                  onChange={(e) => setFormData({ ...formData, board: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-indigo-500"
+                >
+                  {boardsList.map((b) => (
+                    <option key={b.id || b.name} value={b.name}>
+                      {b.name} ({b.curriculum || b.shortName})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Gender</label>
@@ -604,6 +649,22 @@ export default function StudentManagement({
                 </div>
               </div>
 
+              {/* Edit Educational Board */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Educational Board</label>
+                <select
+                  value={editingStudent.board || defaultBoard}
+                  onChange={(e) => setEditingStudent({ ...editingStudent, board: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                >
+                  {boardsList.map((b) => (
+                    <option key={b.id || b.name} value={b.name}>
+                      {b.name} ({b.curriculum || b.shortName})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div>
                   <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Email</label>
@@ -728,6 +789,10 @@ export default function StudentManagement({
             </div>
 
             <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-xs space-y-2.5">
+              <div className="flex justify-between py-1 border-b border-slate-800/80">
+                <span className="text-slate-400">Educational Board:</span>
+                <span className="font-semibold text-emerald-400">{viewingStudent.board || defaultBoard}</span>
+              </div>
               <div className="flex justify-between py-1 border-b border-slate-800/80">
                 <span className="text-slate-400">Student ID / Roll:</span>
                 <span className="font-mono font-bold text-white">{viewingStudent.studentId || viewingStudent.rollNo}</span>

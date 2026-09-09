@@ -113,10 +113,12 @@ export default function StudentDashboard({
           
           {/* Header Card */}
           <div className="bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 text-white p-8 rounded-3xl border border-indigo-800/40 shadow-xl space-y-3">
-            <div className="flex items-center space-x-2 text-indigo-300 text-xs font-bold uppercase tracking-wider">
+            <div className="flex flex-wrap items-center gap-2 text-indigo-300 text-xs font-bold uppercase tracking-wider">
               <span>Student ID: {studentId}</span>
               <span>•</span>
-              <span>{assignedClass} • {assignedPlan}</span>
+              <span>{assignedClass}</span>
+              <span>•</span>
+              <span className="text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">{student.board || 'Tamil Nadu State Board'}</span>
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight">
               Good morning, {student.name || 'Student'} 👋

@@ -4,16 +4,22 @@ import {
   CheckCircle2, X, AlertCircle, BookOpen, User, AlertTriangle
 } from 'lucide-react';
 
+import { initialTuitionData } from '../../data/tuitionData';
+
 export default function SubjectManagement({ 
   subjects = [], 
   standardsList = [], 
+  boardsList = initialTuitionData.boardsList || [],
   teachers = [], 
   onAddSubject, 
   onUpdateSubject, 
   onDeleteSubject 
 }) {
+  const defaultBoard = boardsList[0]?.name || 'Tamil Nadu State Board (Samacheer Kalvi)';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filterClass, setFilterClass] = useState('all');
+  const [filterBoard, setFilterBoard] = useState('all');
 
   // Modals
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -29,6 +35,7 @@ export default function SubjectManagement({
     name: '',
     nameTamil: '',
     standard: standardsList[0]?.name || 'Class 10 (SSLC)',
+    board: defaultBoard,
     description: '',
     assignedTeacherId: teachers[0]?.id || '',
     imagePresentation: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80'
@@ -49,7 +56,11 @@ export default function SubjectManagement({
       (s.description && s.description.toLowerCase().includes(searchQuery.toLowerCase()));
 
     const matchesClass = filterClass === 'all' || s.standard === filterClass;
-    return matchesSearch && matchesClass;
+    const matchesBoard = 
+      filterBoard === 'all' || 
+      s.board === filterBoard || 
+      (!s.board && filterBoard === defaultBoard);
+    return matchesSearch && matchesClass && matchesBoard;
   });
 
   const handleOpenAddModal = () => {
@@ -83,6 +94,7 @@ export default function SubjectManagement({
     const newSubject = {
       code: formData.code.trim().toUpperCase(),
       standard: formData.standard,
+      board: formData.board || defaultBoard,
       name: formData.name.trim(),
       nameTamil: formData.nameTamil.trim(),
       description: formData.description.trim() || 'Curriculum Syllabus and Practical Topics.',
@@ -185,6 +197,17 @@ export default function SubjectManagement({
               <option key={std.id || std.name} value={std.name}>{std.name}</option>
             ))}
           </select>
+
+          <select
+            value={filterBoard}
+            onChange={(e) => setFilterBoard(e.target.value)}
+            className="px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs focus:outline-none focus:border-blue-500 w-full sm:w-auto"
+          >
+            <option value="all">All Boards</option>
+            {boardsList.map((b) => (
+              <option key={b.id || b.name} value={b.name}>{b.shortName || b.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -215,6 +238,11 @@ export default function SubjectManagement({
                       <span className="font-mono text-[10px] text-slate-500 font-bold">
                         {sub.code}
                       </span>
+                    </div>
+
+                    <div className="text-[10px] font-medium text-emerald-400 flex items-center space-x-1">
+                      <span>🎓</span>
+                      <span className="truncate">{sub.board || defaultBoard}</span>
                     </div>
 
                     <h4 className="text-sm font-extrabold text-white leading-snug">{sub.name}</h4>
@@ -337,6 +365,22 @@ export default function SubjectManagement({
                 </div>
               </div>
 
+              {/* Educational Board Dropdown */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Educational Board / Curriculum *</label>
+                <select
+                  value={formData.board}
+                  onChange={(e) => setFormData({ ...formData, board: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-blue-500"
+                >
+                  {boardsList.map((b) => (
+                    <option key={b.id || b.name} value={b.name}>
+                      {b.name} ({b.curriculum || b.shortName})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div>
                 <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Regional Name / Tamil Translation</label>
                 <input
@@ -418,6 +462,22 @@ export default function SubjectManagement({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Edit Educational Board */}
+              <div>
+                <label className="block text-slate-300 font-semibold mb-1 uppercase text-[10px]">Educational Board</label>
+                <select
+                  value={editingSubject.board || defaultBoard}
+                  onChange={(e) => setEditingSubject({ ...editingSubject, board: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white"
+                >
+                  {boardsList.map((b) => (
+                    <option key={b.id || b.name} value={b.name}>
+                      {b.name} ({b.curriculum || b.shortName})
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
